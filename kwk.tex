@@ -1,0 +1,395 @@
+\documentclass[12pt, a4paper, twoside, titlepage]{article}
+
+\usepackage{answers}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{multicol}
+\usepackage{mathrsfs}
+\usepackage{german}
+\usepackage[margin=1in]{geometry} 
+\usepackage{amsmath,amsthm,amssymb}
+ 
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\R}{\mathbb{R}}
+
+\DeclareMathOperator{\sech}{sech}
+\DeclareMathOperator{\csch}{csch}
+ 
+\newenvironment{theorem}[2][Theorem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{definition}[2][Definition]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{proposition}[2][Proposition]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{lemma}[2][Lemma]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{exercise}[2][Exercise]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{solution}[2][Solution]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
+\newenvironment{problem}[2][Problem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{question}[2][Question]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{corollary}[2][Corollary]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+
+\title{Modellierung von Kraft-W\" arme-Kopplungs-Anlagen \\
+Anbindung geologischer W\" armespeicher}
+\begin{document}
+
+\maketitle
+ 
+
+\section{Geologische Speicher}
+%
+Modelliert wird das r\" aumliche und zeitliche Verhalten von Str\" omung und W\" arme einschlie\ss lich deren Wechselwirkungen.
+%
+Das Modellgebiet umfasst den Speicher und das Speicherumfeld.
+%
+Das Druck- und Temperaturfeld werden aus einem Initalzustand heraus berechnet (z.B. aus dem urspr\" unglichen und ungest\" orten Zustand oder aus dem Ende einer Belandungsphase heraus).
+%
+Die Entwicklung beider Felder wird \" uber Austauschraten und Randbedingungen gesteuert
+(z.B. der Speicherleistung, Landoberfl" achentemperatur, Abfl\" usse).
+%
+Die Parameter sind stets messbare Gr\" ossen.
+%
+%
+\subsection{Bilanzgleichungen} 
+%
+%
+\noindent
+Druckfeld $p = p(x, y, z, t)$ und Temperaturfeld $T = T(x,y,z, t)$ wird mit den folgenden Bilanzgleichungen f\" ur Masse (\ref{eqn:bilanz_masse}) und innerer Energie (\ref{eqn:bilanz_innereEnergie}) berechnet
+%
+\begin{subequations}
+\begin{align}
+S_s\frac{\partial p}{\partial t} + \nabla \cdot \vec q^L &= \tilde q^L
+\label{eqn:bilanz_masse} \\
+C\frac{\partial T}{\partial t} + \nabla \cdot \left(\vec q_{adv}^H +  \vec q^H \right ) &= \tilde q^H
+\label{eqn:bilanz_innereEnergie}
+\end{align}
+\end{subequations}
+%
+Externe Quellen und Senken werden \" uber die Terme $\tilde q^L$ und $\tilde q^H$ ber\" ucksichtig.
+\noindent
+Der Speicherkoeffizient $S_s$ und die W\" armekapazit\" at $C$ sind wie folgt
+%
+\begin{subequations}
+\begin{align}
+S_s &= \phi \alpha_l + (1-\phi) \alpha_s \\
+C &= \phi \rho_l c_l + (1-\phi) \rho_s c_s
+\end{align}
+\end{subequations}
+%
+Der Index $l$ bezeichnet einen Fl\" ussigkeitsparameter und der Index $s$ einen Festphasenparameter.
+%
+Der Parameter $\phi$ gibt den Volumenanteil der Nicht-Festphase an
+(Porosit\" at im Aquifer, $\phi=1$ innerhalb einer Sondenverrohrung).
+%
+Der Parameter $\alpha$ kenzeichnet die Kompressibilit\" at der entsprechenden Phase,
+%
+$\rho$ die Dichte und $c$ die spezifische Kapazit\" at.
+%
+
+\noindent
+Geologische Speicher bestehen im Wesentlichen aus einer W\" armetr\" agerfl\" ussigkeit und aus Material (Sedimente, Verrohrung, Isolation, etc.).
+%
+Weitere Fl\" ussigkeiten k\" onnen mitsimuliert werden, um dernen Einfl\" usse zu ber\" ucksichtigen (z.B. W\" armeverluste durch Grundwasser).
+%
+Weiterhin k\" onnen Gase eine Rolle spielen (z.B. die teilweise wasserges\" attigte Bodenzone).
+%
+Gase werden bei der Speichersimulation als immobil angenommen und die Festphasenparameter entsprechend angepasst.
+%
+Allerdings unterst\"utzt die zugrundeliegende Implementation auch die Simulation von Gasbewegungen und Phasen\" uberg\" angen.
+%
+\subsubsection{Diffusion und Dispersion}
+%
+\noindent
+Die folgenden Gradientenfl\" usse treten auf
+%
+\begin{subequations}
+\begin{align}
+\vec q^L &= - \frac{\bold k}{\mu} \nabla\left( p + \rho_l g z \right)
+\label{eqn:flussStroemung} \\
+\vec q^H &= -\left( \bold \Lambda + \rho_l c_l \bold D \right) \nabla T
+\label{eqn:flussWaerme}
+\end{align}
+\end{subequations}
+%
+wobei $\mu$ die dynamische Viskosit\" at und $g$ die Gravitationskonstante sind.
+%
+Der Permeabilit\" atstensor ist in diesem Zusammenhang eine Diagonalmatrix
+$k_{ij} = k_i \delta_{ij} $ ($i$, $j$ = $1$, $2$, $3$)
+und die W\" armeleitf\" ahigkeit isotrop $\Lambda_{ii} = \lambda$, wobei
+$\lambda = \phi \lambda_l + (1-\phi) \lambda_s$.
+%
+Bei Bedarf k\" onnen im Speichermodell auch vollbesetzte Leitf\" ahigkeistensoren verwendet werden.
+
+\noindent
+Der Durchfluss (\ref{eqn:flussStroemung}) wird in der Hydrogeologie Darcy-Gesetz genannt und der W\" armefluss
+(\ref{eqn:flussWaerme}) beinhaltet das Fourier-Gesetz. 
+%
+Wird ein por\" oses Medium (z.B. ein Speichersediment) durchstr\" omt, so tritt zus\" atzlich Dispersion auf
+%
+\begin{eqnarray}
+D_{ij} = \alpha_l | \vec q^L | \delta_{ij} + \left( \alpha_t - \alpha_l \right) \frac{q_i^L q_j^L}{| \vec q^L | }  
+\label{eqn:dispersion}
+\end{eqnarray}
+%
+wobei $\alpha_l$ die Dispersionsl\" ange in Str\" omungsrichtung (longitudinal) und 
+$\alpha_t$ die Dispersionsl\" ange senkrecht zur Str\" omungsrichtung (transversal) sind.
+%
+\subsubsection{Konvektion}
+%
+\noindent
+Str\" omung transportiert W\" arme gem\" a\ss
+%
+\begin{eqnarray}
+\vec q_{adv}^H = \rho_l c_l \vec q^L T
+\label{eqn:advektion}
+\end{eqnarray}
+%
+\noindent
+W\" arme beeinflu\ss t Str\" omung \" uber die Dichte $\rho_l = \rho_l(T)$ und Viskosit\" at $\mu = \mu(T)$.
+%
+Gleichung (\ref{eqn:flussStroemung}) berechnet den Auftrieb und es kann zu freien Konvektionsstr\" omungen kommen.
+%
+
+%
+
+\subsubsection{L\" osungsans\" atze}
+%
+
+%
+\begin{figure} [b!]
+\centering
+\includegraphics[width=50mm]{nnnc.png}
+\caption{Kopplung von BTES-Sondenstr\" angen \" uber einen thermischen NNNC-Flu\ss \ $Q_T$. Vollst\" andiger Rundlauf (links) und NNNC-gekoppelte Str\" ange (rechts).}
+\label{fig:nnnc}
+\end{figure}
+%
+
+%
+\noindent
+Es erfolgt eine Finite-Element-Diskretisierung des Modellgebietes. 
+%
+Das Bilanzgleichungssystem ist ein Anfangswert-Randwert-Problem und wird zeitschrittweise gel\" ost.
+%
+Die enthaltenden Gleichungen f\" ur Str\" omung (\ref{eqn:bilanz_masse}) und W\" arme (\ref{eqn:bilanz_innereEnergie}) werden sequentiell gel\" ost und bei Bedarf \" uber diese iteriert.
+
+%
+Diskretisierungsknoten aus unterschiedlichen Regionen im Modellgebiet k\" onnen durch Austauschfl\" usse (Non-Neighbor Node Connections - NNNCs) verkn\" upft werden.
+%
+Somit lassen sich beispielsweise Sondenstr\" ange in BTES-Simulationen verbinden
+und der Vernetzungs- und Rechenaufwand deutlich reduzieren (Abbildung \ref{fig:nnnc}).
+%
+%
+
+
+\subsection{Gesamtspeichersimulationsans\" atze}
+%
+\begin{figure} [b!]
+\centering
+\includegraphics[width=150mm]{speicher.png}
+\caption{(a) ATES-Brunnendoublette; (b) BTES-Sondenstrangpaar. Ein BTES besteht aus einer Vielzahl an W\" armesonden (Bohrungen), die jeweils Sondenstr\" ange enthalten.}
+\label{fig:speicher}
+\end{figure}
+%
+
+
+Die Speicherung und der Entzug von W\" arme erfolgt bei Aquiferw\"armespeichern (ATES-Systemen) mittels Injektions- und Extraktionsbrunnen (Brunnendoubletten).
+%
+\" Uber die Brunnen zirkuliert ein Speichermedium (Wasser) durch ein Aquifer und eine Installation an der Landoberfl\" ache.
+%
+In Erdw\" armesondenfeldern (BTES-Systemen) befindet sich eine Vielzahl an
+Erdw\" armesonden von einigen zehner Metern L\" ange innerhalb von vertikalen Bohrungen.
+%
+Eine W\" armetr\" agerfl\" ussigkeit zirkuliert durch die Verrohrung.
+%
+Aquiferspeicherbeladung und Entladung erfolgt durch Zirkulation der W\" armetr\" agerfl\" ussigkeit in entgegengesetzer Str\" omungsrichtung.
+%
+Bei Erdw\" armefeldern wird \" ublicherweise ebenfalls die Str\" omungsrichung zur Entladung umgekehrt, so dass das W\" armetr\" agerfluid im Bereich des Speicherzentrums w\" armer als am Speicherrandbereich ist.
+%
+Damit lassen sich laterale W\" armeverluste verringern.
+
+%
+\subsubsection{Aquiferw\" armespeicher - ATES-Systeme}
+%
+%
+Die Durchfl\" usse innerhalb der Brunnenbohrungen und innerhalb sonstiger Verrohrungen werden im Speichermodell durch L\" osen der Bilanzgleichungen (\ref{eqn:bilanz_masse}) und (\ref{eqn:bilanz_innereEnergie}) in 1D berechnet.
+%
+Der Einfluss von Rohrkr\" ummungen auf das Str\" omungsverhalten wird nicht ber\" ucksichtigt.
+%
+Zur Vereinfachung k\" onnen Rohrstr\" ange mit NNNC verkn\" upft werden (Abb. \ref{fig:speicher}(a)). 
+%
+Es wird das Druck- und Temperaturfeld im Speicheraquifer und zumindest in den angrenzenden Stauschichten in 3D berechnet.
+%
+
+
+%
+Im Speicheraquifer tritt gew\" ohnlicherweise eine Temperaturschichtung auf (Warmes Wasser \" uber dem kalten Wasser).
+%
+Daher sind Kopplungsiterationen zwischen den beiden Bilanzgleichungen erforderlich.
+%
+Besteht eine nat\" urliche Grundwasserstr\" omung (Hintergrundstr\" omung), so beeinflu\ss t sie die R\" uckgewinnungsrate im Speicherbetrieb.
+%
+Sie wird mittels Str\" omungsquellen- und Senkenterme $\tilde q^L$, Druckrandbedingungen und (oberstromige) Temperaturrandbedingungen im Modell erzeugt.
+%
+ 
+%
+\subsubsection{Erdw\" armesondenfelder - BTES-Systeme}
+%
+%
+Das Temperaturfeld wird in 3D abgebildet.
+%
+Somit werden die thermischen Wechselwirkungen zwischen den Sondenstr\" angen innerhalb einer Erdw\" armesonde detailiert abgebildet. 
+%
+Sie spielen eine wichtige Rolle, wohingegen das Str\" omungsprofil vereinfacht in 1D abgebildet wird ($\phi = 1$, $S_s = 0$).
+%
+Sondenstr\" ange innerhalb von einer Bohrung oder \" uber Bohrungen hinweg werden \" uber NNNC gekoppelt (Abb. \ref{fig:nnnc}, \ref{fig:speicher}(b)).
+
+%
+Speichermedium sind die Sedimente einschlie\ss lich der darin enthaltenen Fl\" ussigkeiten (Grundwasser).
+%
+Der W\" armeaustausch zwischen dem W\" armetr\" agerfluid in der Verrohrung und dem Speichermedium erfolgt konduktiv.
+%
+Steile Temperaturgradienten im Nahbereich der Sonden erfordern eine hohe zeitliche und r\" aumliche Aufl\" osung in den Simulationen.
+%
+
+%
+Eine Grundwasserstr\" omung an oder im Umfeld von Erdw\" armesonden kann die R\" uckgewinnungsrate beeinflussen und wird gegebenfalls \" uber Quellen- und Senkenterme bzw. Randbedingungen ber\" ucksichtigt.
+%
+Eine wichtige Rolle spielen W\" armeverluste \" uber die Isolationsschicht an der Landoberfl\" ache.
+%
+Diese werden im Modell \" uber eine Temperaturrandbedingung erzeugt.
+%
+W\" armeverluste in laterale oder tiefere Regionen werden ebenso durch Temperaturrandbedingungen im Modell erzeugt. 
+ 
+\subsection{Steuerung des Speicherbetriebes}
+%
+Der Speicherbetrieb wird im Modell \" uber Randbedingungen und Austauschraten (Quell- und Senkenterme) gesteuert.
+%
+Unabh\" angig von der Art des W\" armespeichers (ATES oder BTES) wird zur L\" osung der W\" armebilanzgleichung (\ref{eqn:bilanz_innereEnergie}) die Temperatur der einstr\" omenden Fl\" ussigkeit $T_{in}$ ben\" otigt (Abb. \ref{fig:speicher}).
+%
+Es mu\ss \ ferner entweder die Flie\ss rate $q^L$ vorgegeben sein oder es mu\ss \ sich diese aus alternativen Vorgaben invers bestimmen lassen.
+%
+%
+Die Speicherleistung (Einspeicherrate $\hat q^T >0$ beziehungsweise die Entnahmerate $\hat q^T < 0$) ergibt sich aus der Temperaturdifferenz zwischen den einstr\" omenden und ausstr\" omenden Fl\" ussigkeiten
+%
+\begin{eqnarray}
+\hat q^{T} = q^L \left[ (c_{l} \rho_{l} T)^{SP}_{in} - (c_{l} \rho_{l} T)^{SP}_{out}\right]
+\label{eqn:leistung}
+\end{eqnarray}
+%
+Ist eine gewisse Speicherleistung $\hat q^{T}$ vorgegeben, so wird daraus die Temperatur der ausstr\" omenden Fl\" ussigkeit $T^{SP}_{out}$ und eine Flie\ss rate 
+%
+\begin{eqnarray}
+\hat q^L = \frac{\hat q^{T}}{ (c_{l} \rho_{l} T)^{SP}_{in} - (c_{l} \rho_{l} T)^{SP}_{out}}
+\end{eqnarray}
+%
+berechnet.
+%
+Die Berechnung erfolgt \" uber eine Iteration \" uber die Bilanzgleichungen f\" ur die Str\" omung (\ref{eqn:bilanz_masse}) und W\" arme (\ref{eqn:bilanz_innereEnergie}). 
+
+
+Zus\" atzlich bestehen Zwangsbedingungen in Form von Schwellen
+%
+\begin{subequations}
+\begin{align}
+q^L &\leq q_{max}^L
+\label{eqn:schwelleFliessrate} \\
+ p_{min} &\leq p \leq p_{max}
+\label{eqn:schwelleDruckfeld} \\
+ T_{min} &\leq T \leq T_{max}
+\label{eqn:schwelleTemperaturfeld}
+\end{align}
+\end{subequations}
+%
+So ist die Flie\ss rate beispielsweise durch eine maximale Pumprate und das Temperaturfeld durch einen Gefrierpunkt beschr\" ankt.
+%
+Wird eine dieser Schwellen w\" ahrend des Speicherbetriebes \" uberschritten, so l\" asst sich im Modell die Fliessrate entsprechend anpassen und die Simulation mit der maximal m\" oglichen Speicherleistung fortsetzen.
+
+\subsection{Proxy-Ans\"atze}
+
+Gesamtspeichersimulationen bedingen hohe Modellerstellungs- und Rechenresourcen. Daher werden Proxy-Modelle verwendet.
+
+\begin{figure} [b!]
+\centering
+\includegraphics[width=150mm]{proxy_ATES.png}
+\caption{Proxy-Modellansatz zur effizienten Absch\" atzung der Leistung (Raten, Temperaturen) eines Aquiferw\" armespeichers.}
+\label{fig:proxy_ATES}
+\end{figure}
+
+
+\begin{figure} [b!]
+\centering
+\includegraphics[width=150mm]{proxy_BTES.png}
+\caption{Proxy-Modellansatz zur effizienten Absch\" atzung der Speicherleistung (Raten, Temperaturen) eines Erdw\" armesondenfeldes.}
+\label{fig:proxy_BTES}
+\end{figure}
+
+
+
+\subsubsection{Aquiferw\" armespeicher - ATES-Systeme}
+%
+Bei hinreichend gro\ss em Brunnenabstand erfolgt die W\" armeausbreitung im Nahfeld der Brunnen zylindrisch.
+%
+In diesem Fall kann die Einspeicher- und Entzugsleistung (Gleichung \ref{eqn:leistung})
+mit axialsymmetrischen 2D-Modellen berechnet werden (Abbildung \ref{fig:proxy_ATES}). 
+%
+Dichtevariationen und W\" armeverluste in angrenzende Stauschichten werden dabei ber\" ucksichtigt.
+%
+Der Einfluss einer nat\" urlichen Grundwasserstr\" omung (Hintergrundstr\" omung) bleibt dabei unber\" ucksichtigt.
+
+\subsubsection{Erdw\" armesondenfelder - BTES-Systeme}
+%
+Es wird lediglich eine Einzelsonde im Speicherbetrieb simuliert und angenommen, dass sich die Sonden in einem Gesamtspeicher gleichartig verhalten und gegenseitig nicht beeinflussen (Spiegelsondenansatz).
+%
+Aus der errechneten Leistung der Einzelsonde (Gleichung \ref{eqn:leistung}) ergibt sich der Sondenbedarf des Gesamtspeichers.
+%
+Dar\" uber hinaus lassen sich aus dem errechneten W\" armefeld die lateralen W\" armeverluste absch\" atzen.
+
+%
+\section{Kraftwerkmodell}
+%
+\subsection{W\" armetauscher}
+%
+
+%
+\begin{subequations}
+\begin{align}
+q^L \left[ (c_l \rho_l T)^{WP}_{in,1} - (c_l \rho_l T)^{WP}_{out,1} \right] &= q^L \left[ (c_l \rho_l T)^{WP}_{out,2} - (c_l \rho_l T)^{WP}_{in,2} \right] \\
+Q^T_{tausch}  &=  k A_q \Delta T_m
+\end{align}
+\end{subequations}
+%
+Der W\" armeaustausch $Q^T_{tausch}$ ergibt sich aus der effektiven mittlere Temperaturdifferenz
+$\Delta T_m = \Delta T_m (T^{WP}_{in,1}, T^{WP}_{out,1}, T^{WP}_{in,2}, T^{WP}_{out,2})$,
+die von der Stromf\" uhrung im W\" armetauscher (z.B. Gleich-, Gegen-, Kreuzstrom) abh\" angt.
+%
+Austauschparameter sind der W\" armedurchgangskoeffizient $k$ und die W\" arme\" ubertragungsfl\" ache $A_q$.
+
+\section{Modellschnittstelle}
+%
+
+\begin{figure} [b!]
+\centering
+\includegraphics[width=100mm]{speicheranbindung.png}
+\caption{Speicheranbindung.}
+\label{fig:speicheranbindung}
+\end{figure}
+
+
+\begin{figure} [b!]
+\centering
+\includegraphics[width=150mm]{waermenetz.png}
+\caption{W\" armenetz.}
+\label{fig:waermenetz}
+\end{figure}
+
+
+\end{document}
+
